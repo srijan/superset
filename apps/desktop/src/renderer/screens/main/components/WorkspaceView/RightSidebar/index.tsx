@@ -1,4 +1,9 @@
 import { Button } from "@superset/ui/button";
+import {
+	ResizableHandle,
+	ResizablePanel,
+	ResizablePanelGroup,
+} from "@superset/ui/resizable";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@superset/ui/tooltip";
 import { useParams } from "@tanstack/react-router";
 import { useCallback } from "react";
@@ -7,8 +12,10 @@ import {
 	LuFile,
 	LuGitCompareArrows,
 	LuShrink,
+	LuStickyNote,
 	LuX,
 } from "react-icons/lu";
+import { VscChevronRight } from "react-icons/vsc";
 import { HotkeyLabel } from "renderer/hotkeys";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import {
@@ -22,6 +29,7 @@ import type { ChangeCategory, ChangedFile } from "shared/changes-types";
 import { useScrollContext } from "../ChangesContent";
 import { ChangesView } from "./ChangesView";
 import { FilesView } from "./FilesView";
+import { NotesView } from "./NotesView";
 import { getSidebarHeaderTabButtonClassName } from "./headerTabStyles";
 
 function TabButton({
@@ -85,6 +93,10 @@ export function RightSidebar() {
 	const setMode = useSidebarStore((s) => s.setMode);
 	const sidebarWidth = useSidebarStore((s) => s.sidebarWidth);
 	const isExpanded = currentMode === SidebarMode.Changes;
+	const isNotesPanelOpen = useSidebarStore((s) => s.isNotesPanelOpen);
+	const toggleNotesPanel = useSidebarStore((s) => s.toggleNotesPanel);
+	const notesPanelSize = useSidebarStore((s) => s.notesPanelSize);
+	const setNotesPanelSize = useSidebarStore((s) => s.setNotesPanelSize);
 	const compactTabs = sidebarWidth < 250;
 	const showChangesTab = !!worktreePath;
 
@@ -219,30 +231,76 @@ export function RightSidebar() {
 					</Tooltip>
 				</div>
 			</div>
-			{showChangesTab && (
-				<div
-					className={
-						rightSidebarTab === RightSidebarTab.Changes
-							? "flex-1 min-h-0 flex flex-col overflow-hidden"
-							: "hidden"
-					}
-				>
-					<ChangesView
-						onFileOpen={handleFileOpen}
-						isExpandedView={isExpanded}
-						isActive={rightSidebarTab === RightSidebarTab.Changes}
-					/>
-				</div>
-			)}
-			<div
-				className={
-					rightSidebarTab === RightSidebarTab.Changes && showChangesTab
-						? "hidden"
-						: "flex-1 min-h-0 flex flex-col overflow-hidden"
-				}
+			<ResizablePanelGroup
+				direction="vertical"
+				className="flex-1 min-h-0"
 			>
-				<FilesView />
-			</div>
+				<ResizablePanel defaultSize={isNotesPanelOpen ? 100 - notesPanelSize : 100} minSize={30}>
+					{showChangesTab && (
+						<div
+							className={
+								rightSidebarTab === RightSidebarTab.Changes
+									? "h-full flex flex-col overflow-hidden"
+									: "hidden"
+							}
+						>
+							<ChangesView
+								onFileOpen={handleFileOpen}
+								isExpandedView={isExpanded}
+								isActive={rightSidebarTab === RightSidebarTab.Changes}
+							/>
+						</div>
+					)}
+					<div
+						className={
+							rightSidebarTab === RightSidebarTab.Changes && showChangesTab
+								? "hidden"
+								: "h-full flex flex-col overflow-hidden"
+						}
+					>
+						<FilesView />
+					</div>
+				</ResizablePanel>
+
+				{isNotesPanelOpen && (
+					<>
+						<ResizableHandle />
+						<ResizablePanel
+							defaultSize={notesPanelSize}
+							minSize={10}
+							maxSize={70}
+							onResize={setNotesPanelSize}
+						>
+							<div className="h-full flex flex-col overflow-hidden border-t">
+								<button
+									type="button"
+									onClick={toggleNotesPanel}
+									className="flex items-center gap-1.5 px-2 py-1.5 text-left hover:bg-accent/30 cursor-pointer transition-colors shrink-0"
+								>
+									<VscChevronRight className="size-3 text-muted-foreground shrink-0 rotate-90 transition-transform duration-150" />
+									<LuStickyNote className="size-3 text-muted-foreground shrink-0" />
+									<span className="text-xs font-medium truncate">Notes</span>
+								</button>
+								<div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+									<NotesView />
+								</div>
+							</div>
+						</ResizablePanel>
+					</>
+				)}
+			</ResizablePanelGroup>
+
+			{!isNotesPanelOpen && (
+				<button
+					type="button"
+					onClick={toggleNotesPanel}
+					className="flex items-center gap-1.5 px-2 py-1.5 text-left hover:bg-accent/30 cursor-pointer transition-colors shrink-0 border-t"
+				>
+					<VscChevronRight className="size-3 text-muted-foreground shrink-0 transition-transform duration-150" />
+					<LuStickyNote className="size-3 text-muted-foreground shrink-0" />
+					<span className="text-xs font-medium truncate">Notes</span>
+				</button>
+			)}
 		</aside>
 	);
 }
