@@ -3,12 +3,18 @@ import type { AgentLaunchRequest, AgentLaunchSource } from "./agent-launch";
 import {
 	type AgentDefinitionId,
 	buildFileCommandFromAgentConfig,
-	buildPromptCommandFromAgentConfig,
 	getCommandFromAgentConfig,
 	type ResolvedAgentConfig,
 	renderTaskPromptTemplate,
 	type TerminalResolvedAgentConfig,
 } from "./agent-settings";
+
+function promptFileName(taskSlug: string | undefined): string {
+	if (taskSlug && /^[a-zA-Z0-9._-]+$/.test(taskSlug)) {
+		return `prompt-${taskSlug}.md`;
+	}
+	return `prompt-${crypto.randomUUID()}.md`;
+}
 
 function getRequiredAgentConfig(
 	configsById: ReadonlyMap<AgentDefinitionId, ResolvedAgentConfig>,
@@ -131,10 +137,15 @@ export function buildPromptAgentLaunchRequest({
 			: `Attached files (available in workspace):\n${fileList}`;
 	}
 
+	// Route prompts through a file + `$(cat 'path')` substitution so the launch
+	// command is compatible with fish (which does not support POSIX heredocs).
+	// The terminal adapter writes the file before executing the command.
+	const taskPromptFileName = enhancedPrompt
+		? promptFileName(taskSlug)
+		: undefined;
 	const command = enhancedPrompt
-		? buildPromptCommandFromAgentConfig({
-				prompt: enhancedPrompt,
-				randomId: crypto.randomUUID(),
+		? buildFileCommandFromAgentConfig({
+				filePath: `.superset/${taskPromptFileName}`,
 				config,
 			})
 		: getCommandFromAgentConfig(config);
@@ -150,6 +161,12 @@ export function buildPromptAgentLaunchRequest({
 			command,
 			name: config.label,
 			initialFiles: initialFiles?.length ? initialFiles : undefined,
+			...(enhancedPrompt && taskPromptFileName
+				? {
+						taskPromptContent: enhancedPrompt,
+						taskPromptFileName,
+					}
+				: {}),
 		},
 	};
 }
