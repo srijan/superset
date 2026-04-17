@@ -155,6 +155,7 @@ export const EXTERNAL_APPS = [
 	"zed",
 	"sublime",
 	"xcode",
+	"emacs",
 	"iterm",
 	"warp",
 	"terminal",

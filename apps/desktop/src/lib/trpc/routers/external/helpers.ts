@@ -17,6 +17,7 @@ const MACOS_APP_NAMES: Record<ExternalApp, string | null> = {
 	terminal: "Terminal",
 	ghostty: "Ghostty",
 	sublime: "Sublime Text",
+	emacs: null, // Always invoked via `emacsclient -n`, handled before platform split
 	intellij: null, // Multi-edition, uses bundle IDs
 	webstorm: "WebStorm",
 	pycharm: null, // Multi-edition, uses bundle IDs
@@ -57,6 +58,7 @@ const LINUX_CLI_COMMANDS: Record<ExternalApp, string | null> = {
 	terminal: null, // No universal Linux terminal command
 	ghostty: "ghostty",
 	sublime: "subl",
+	emacs: null, // Always invoked via `emacsclient -n`, handled before platform split
 	intellij: null, // Multi-edition, uses CLI candidates
 	webstorm: "webstorm",
 	pycharm: null, // Multi-edition, uses CLI candidates
@@ -95,6 +97,10 @@ export function getAppCommand(
 	targetPath: string,
 	platform: NodeJS.Platform = process.platform,
 ): { command: string; args: string[] }[] | null {
+	if (app === "emacs") {
+		return [{ command: "emacsclient", args: ["-n", targetPath] }];
+	}
+
 	if (platform === "darwin") {
 		const bundleIds = BUNDLE_ID_CANDIDATES[app];
 		if (bundleIds) {

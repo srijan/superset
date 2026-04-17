@@ -151,6 +151,20 @@ describe("getAppCommand", () => {
 			{ command: "intellij-idea-community", args: ["/path/to/file"] },
 		]);
 	});
+
+	test("returns emacsclient command for emacs on darwin", () => {
+		const result = getAppCommand("emacs", "/path/to/file");
+		expect(result).toEqual([
+			{ command: "emacsclient", args: ["-n", "/path/to/file"] },
+		]);
+	});
+
+	test("returns emacsclient command for emacs on Linux", () => {
+		const result = getAppCommand("emacs", "/path/to/file", "linux");
+		expect(result).toEqual([
+			{ command: "emacsclient", args: ["-n", "/path/to/file"] },
+		]);
+	});
 });
 
 describe("resolvePath", () => {
