@@ -5,6 +5,7 @@ import appcodeIcon from "renderer/assets/app-icons/appcode.svg";
 import clionIcon from "renderer/assets/app-icons/clion.svg";
 import cursorIcon from "renderer/assets/app-icons/cursor.svg";
 import datagripIcon from "renderer/assets/app-icons/datagrip.svg";
+import emacsIcon from "renderer/assets/app-icons/emacs.png";
 import finderIcon from "renderer/assets/app-icons/finder.png";
 import fleetIcon from "renderer/assets/app-icons/fleet.svg";
 import ghosttyIcon from "renderer/assets/app-icons/ghostty.svg";
@@ -71,6 +72,7 @@ export const IDE_OPTIONS: OpenInExternalAppOption[] = [
 		darkIcon: sublimeIcon,
 	},
 	{ id: "xcode", label: "Xcode", lightIcon: xcodeIcon, darkIcon: xcodeIcon },
+	{ id: "emacs", label: "Emacs", lightIcon: emacsIcon, darkIcon: emacsIcon },
 ];
 
 export const TERMINAL_OPTIONS: OpenInExternalAppOption[] = [
