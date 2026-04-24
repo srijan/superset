@@ -1,15 +1,23 @@
 import { Button } from "@superset/ui/button";
+import {
+	ResizableHandle,
+	ResizablePanel,
+	ResizablePanelGroup,
+} from "@superset/ui/resizable";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@superset/ui/tooltip";
 import { eq } from "@tanstack/db";
 import { useLiveQuery } from "@tanstack/react-db";
 import { Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { LuFile, LuGitCompareArrows } from "react-icons/lu";
+import { LuFile, LuGitCompareArrows, LuStickyNote } from "react-icons/lu";
+import { VscChevronRight } from "react-icons/vsc";
+import { useV2UserPreferences } from "renderer/hooks/useV2UserPreferences";
 import { useWorkspaceGitStatus } from "renderer/routes/_authenticated/_dashboard/v2-workspace/$workspaceId/providers/WorkspaceGitStatusProvider";
 import { useCollections } from "renderer/routes/_authenticated/providers/CollectionsProvider";
 import { useSettings } from "renderer/stores/settings";
 import type { CommentPaneData, DiffFocusSide } from "../../types";
 import { FilesTab } from "./components/FilesTab";
+import { NotesPanel } from "./components/NotesPanel";
 import { PRActionHeader } from "./components/PRActionHeader";
 import { SidebarHeader } from "./components/SidebarHeader";
 import { useChangesTab } from "./hooks/useChangesTab";
@@ -173,6 +181,11 @@ export function WorkspaceSidebar({
 	const tabs: SidebarTabDefinition[] = [filesTab, changesTab, reviewTab];
 	const activeTabDef = tabs.find((t) => t.id === activeTab);
 
+	const { preferences, setNotesPanelOpen, setNotesPanelSize } =
+		useV2UserPreferences();
+	const { notesPanelOpen, notesPanelSize } = preferences;
+	const toggleNotesPanel = () => setNotesPanelOpen((prev) => !prev);
+
 	return (
 		<div
 			ref={containerRef}
@@ -191,9 +204,48 @@ export function WorkspaceSidebar({
 				onTabChange={setActiveTab}
 				compact={compact}
 			/>
-			<div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-				{activeTabDef?.content}
-			</div>
+			<ResizablePanelGroup
+				direction="vertical"
+				className="flex min-h-0 min-w-0 flex-1"
+			>
+				<ResizablePanel
+					defaultSize={notesPanelOpen ? 100 - notesPanelSize : 100}
+					minSize={30}
+				>
+					<div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+						{activeTabDef?.content}
+					</div>
+				</ResizablePanel>
+
+				{notesPanelOpen && (
+					<>
+						<ResizableHandle />
+						<ResizablePanel
+							defaultSize={notesPanelSize}
+							minSize={10}
+							maxSize={70}
+							onResize={setNotesPanelSize}
+						>
+							<NotesPanel
+								workspaceId={workspaceId}
+								onCollapse={toggleNotesPanel}
+							/>
+						</ResizablePanel>
+					</>
+				)}
+			</ResizablePanelGroup>
+
+			{!notesPanelOpen && (
+				<button
+					type="button"
+					onClick={toggleNotesPanel}
+					className="flex items-center gap-1.5 px-2 py-1.5 text-left hover:bg-accent/30 cursor-pointer transition-colors shrink-0 border-t"
+				>
+					<VscChevronRight className="size-3 text-muted-foreground shrink-0 transition-transform duration-150" />
+					<LuStickyNote className="size-3 text-muted-foreground shrink-0" />
+					<span className="text-xs font-medium truncate">Notes</span>
+				</button>
+			)}
 		</div>
 	);
 }

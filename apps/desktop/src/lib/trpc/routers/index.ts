@@ -17,6 +17,7 @@ import { createHostServiceCoordinatorRouter } from "./host-service-coordinator";
 import { createKeyboardLayoutRouter } from "./keyboardLayout";
 import { createMenuRouter } from "./menu";
 import { createMigrationRouter } from "./migration";
+import { createNotesRouter } from "./notes";
 import { createNotificationsRouter } from "./notifications";
 import { createPermissionsRouter } from "./permissions";
 import { createPortsRouter } from "./ports";
@@ -51,6 +52,7 @@ export const createAppRouter = (getWindow: () => BrowserWindow | null) => {
 		ports: createPortsRouter(),
 		resourceMetrics: createResourceMetricsRouter(),
 		menu: createMenuRouter(),
+		notes: createNotesRouter(),
 		external: createExternalRouter(),
 		settings: createSettingsRouter(),
 		system: createSystemRouter(),

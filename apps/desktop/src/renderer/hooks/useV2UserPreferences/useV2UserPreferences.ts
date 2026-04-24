@@ -19,6 +19,8 @@ export interface V2UserPreferencesApi {
 	setRightSidebarOpen: (next: boolean | ((prev: boolean) => boolean)) => void;
 	setRightSidebarTab: (next: RightSidebarTab) => void;
 	setRightSidebarWidth: (next: number) => void;
+	setNotesPanelOpen: (next: boolean | ((prev: boolean) => boolean)) => void;
+	setNotesPanelSize: (next: number) => void;
 	setDeleteLocalBranch: (next: boolean) => void;
 	setShowPresetsBar: (next: boolean) => void;
 }
@@ -131,6 +133,47 @@ export function useV2UserPreferences(): V2UserPreferencesApi {
 		[collections],
 	);
 
+	const setNotesPanelOpen = useCallback(
+		(next: boolean | ((prev: boolean) => boolean)) => {
+			const existing = collections.v2UserPreferences.get(
+				V2_USER_PREFERENCES_ID,
+			);
+			const prev =
+				existing?.notesPanelOpen ?? DEFAULT_V2_USER_PREFERENCES.notesPanelOpen;
+			const value = typeof next === "function" ? next(prev) : next;
+			if (!existing) {
+				collections.v2UserPreferences.insert({
+					...DEFAULT_V2_USER_PREFERENCES,
+					notesPanelOpen: value,
+				});
+				return;
+			}
+			collections.v2UserPreferences.update(V2_USER_PREFERENCES_ID, (draft) => {
+				draft.notesPanelOpen = value;
+			});
+		},
+		[collections],
+	);
+
+	const setNotesPanelSize = useCallback(
+		(next: number) => {
+			const existing = collections.v2UserPreferences.get(
+				V2_USER_PREFERENCES_ID,
+			);
+			if (!existing) {
+				collections.v2UserPreferences.insert({
+					...DEFAULT_V2_USER_PREFERENCES,
+					notesPanelSize: next,
+				});
+				return;
+			}
+			collections.v2UserPreferences.update(V2_USER_PREFERENCES_ID, (draft) => {
+				draft.notesPanelSize = next;
+			});
+		},
+		[collections],
+	);
+
 	const setDeleteLocalBranch = useCallback(
 		(next: boolean) => {
 			const existing = collections.v2UserPreferences.get(
@@ -177,6 +220,8 @@ export function useV2UserPreferences(): V2UserPreferencesApi {
 		setRightSidebarOpen,
 		setRightSidebarTab,
 		setRightSidebarWidth,
+		setNotesPanelOpen,
+		setNotesPanelSize,
 		setDeleteLocalBranch,
 		setShowPresetsBar,
 	};

@@ -241,6 +241,8 @@ export const v2UserPreferencesSchema = z.object({
 	rightSidebarOpen: z.boolean().default(true),
 	rightSidebarTab: z.enum(["changes", "files"]).default("changes"),
 	rightSidebarWidth: z.number().default(340),
+	notesPanelOpen: z.boolean().default(false),
+	notesPanelSize: z.number().default(30),
 	deleteLocalBranch: z.boolean().default(false),
 	showPresetsBar: z.boolean().default(true),
 });
@@ -258,6 +260,8 @@ export const DEFAULT_V2_USER_PREFERENCES: V2UserPreferencesRow = {
 	rightSidebarOpen: true,
 	rightSidebarTab: "changes",
 	rightSidebarWidth: 340,
+	notesPanelOpen: false,
+	notesPanelSize: 30,
 	deleteLocalBranch: false,
 	showPresetsBar: true,
 };
