@@ -11,6 +11,10 @@ export enum RightSidebarTab {
 	Files = "files",
 }
 
+export const DEFAULT_NOTES_PANEL_SIZE = 30;
+export const MIN_NOTES_PANEL_SIZE = 10;
+export const MAX_NOTES_PANEL_SIZE = 70;
+
 export const DEFAULT_SIDEBAR_WIDTH = 250;
 export const MIN_SIDEBAR_WIDTH = 200;
 export const MAX_SIDEBAR_WIDTH = 500;
@@ -23,12 +27,16 @@ interface SidebarState {
 	lastMode: SidebarMode;
 	isResizing: boolean;
 	rightSidebarTab: RightSidebarTab;
+	isNotesPanelOpen: boolean;
+	notesPanelSize: number;
 	toggleSidebar: () => void;
 	setSidebarOpen: (open: boolean) => void;
 	setSidebarWidth: (width: number) => void;
 	setMode: (mode: SidebarMode) => void;
 	setIsResizing: (isResizing: boolean) => void;
 	setRightSidebarTab: (tab: RightSidebarTab) => void;
+	toggleNotesPanel: () => void;
+	setNotesPanelSize: (size: number) => void;
 }
 
 export const useSidebarStore = create<SidebarState>()(
@@ -42,6 +50,8 @@ export const useSidebarStore = create<SidebarState>()(
 				lastMode: SidebarMode.Tabs,
 				isResizing: false,
 				rightSidebarTab: RightSidebarTab.Changes,
+				isNotesPanelOpen: false,
+				notesPanelSize: DEFAULT_NOTES_PANEL_SIZE,
 
 				toggleSidebar: () => {
 					const { isSidebarOpen, lastOpenSidebarWidth, currentMode, lastMode } =
@@ -121,6 +131,14 @@ export const useSidebarStore = create<SidebarState>()(
 
 				setRightSidebarTab: (tab) => {
 					set({ rightSidebarTab: tab });
+				},
+
+				toggleNotesPanel: () => {
+					set((state) => ({ isNotesPanelOpen: !state.isNotesPanelOpen }));
+				},
+
+				setNotesPanelSize: (size) => {
+					set({ notesPanelSize: size });
 				},
 			}),
 			{
